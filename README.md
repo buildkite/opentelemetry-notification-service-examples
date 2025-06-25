@@ -1,6 +1,6 @@
 # OpenTelemetry Notification Service Examples
 
-![Configure Notification Service](https://img.shields.io/badge/Add%20Notification%20Provider-140d30?style=for-the-badge&logo=buildkite&logoColor=30f2a2&label=Buildkite&color=30f2a2&link=https%3A%2F%2Fbuildkite.com%2Forganizations%2F~%2Fservices)
+[![Configure Notification Service](https://img.shields.io/badge/Add%20Notification%20Provider-140d30?style=for-the-badge&logo=buildkite&logoColor=30f2a2&label=Buildkite&color=30f2a2&link=https%3A%2F%2Fbuildkite.com%2Forganizations%2F~%2Fservices)](https://buildkite.com/organizations/~/services)
 
 ## Creating a new service
 
