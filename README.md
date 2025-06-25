@@ -2,6 +2,9 @@
 
 [![Configure Notification Service](https://img.shields.io/badge/Add%20Notification%20Provider-140d30?style=for-the-badge&logo=buildkite&logoColor=30f2a2&label=Buildkite&color=30f2a2&link=https%3A%2F%2Fbuildkite.com%2Forganizations%2F~%2Fservices)](https://buildkite.com/organizations/~/services)
 
+> [!IMPORTANT]
+> OpenTelemetry Notification Service is currently in Private Preview. Please contact Buildkite support for access.
+
 ## Creating a new service
 
 [Create a new OpenTelemetry Notification Service](https://buildkite.com/organizations/~/services/open_telemetry_tracing/new) in your organization's Notification Services settings (under Integrations).
