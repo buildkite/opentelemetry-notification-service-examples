@@ -30,7 +30,7 @@ Here are some common examples.
 Key: `Authorization`
 Value: `Bearer <your-token>`
 
-See [bearer-debug.yml](./collector-config/bearer-auth-debug.yml) for example OpenTelemetry Collector configuration.
+See [bearer-token-auth-debug.yml](./collector-config/bearer-token-auth-debug.yml) for example OpenTelemetry Collector configuration.
 
 ### Basic auth
 
@@ -72,18 +72,26 @@ Add the required headers:
 
 Replace `${YOUR_SITE}` with the organization name you received from Datadog.
 
-For more information, see the Datadog documentation: https://docs.datadoghq.com/opentelemetry/setup/agentless/traces/
+For more information, see the Datadog documentation:
+
+https://docs.datadoghq.com/opentelemetry/setup/agentless/traces/
 
 ## Datadog via OpenTelemetry Collector
 
-See [bearer-token-auth-datadog.yml](./collector-config/bearer-token-auth-datadog.yml)
+See [bearer-token-auth-datadog.yml](./collector-config/bearer-token-auth-datadog.yml) for an example of forwarding traces to Datadog APM using the Datadog exporter.
+
+## Computing OpenTelemetry metrics from OpenTelemetry traces
+
+The OpenTelemetry collector can be used to process incoming trace spans and generate custom metrics on the fly using the [signaltometrics](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/connector/signaltometricsconnector) processor, which can be stored in metric stores like Prometheus or InfluxDB.
+
+See [bearer-token-auth-signal-to-metrics-otlp.yml](./collector-config/bearer-token-auth-signal-to-metrics-otlp.yml)
 
 ## Propagating traces to Buildkite agents
 
-See Buildkite documentation for OpenTelemetry tracing:
+See Buildkite documentation for OpenTelemetry tracing from the Buildkite Agent, including spans for plugin and agent hooks.
 https://buildkite.com/docs/agent/v3/tracing#using-opentelemetry-tracing
 
-Requires buildkite agent [v3.100](https://github.com/buildkite/agent/releases/tag/v3.100.0) or more recent.
+Propagating trace spans from the OpenTelemetry Notification service requires Buildkite Agent [v3.100](https://github.com/buildkite/agent/releases/tag/v3.100.0) or newer.
 
 ### Required Agent Flags / Environment Variables
 
