@@ -111,7 +111,7 @@ The OpenTelemetry collector is an open source service for collecting, exporting 
 
 See [collector-config](./collector-config) for examples of OpenTelemetry collector configuration.
 
-If using the `otel/opentelemetry-collector-contrib` image, you can configure the collector by mounting the your config file at `` or by overriding the `command` to `-config=env:OTEL_CONFIG` and setting the `OTEL_CONFIG` environment variable to the *contents* of your config file.
+If using the `otel/opentelemetry-collector-contrib` image, you can configure the collector by mounting the your config file at `/etc/otelcol-contrib/config.yaml` or by overriding the `command` to `-config=env:OTEL_CONFIG` and setting the `OTEL_CONFIG` environment variable to the *contents* of your config file.
 
 Consult the [Deployment](https://opentelemetry.io/docs/collector/deployment/) guide in the OpenTelemetry documentations for more information about hosting the collector.
 
