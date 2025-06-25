@@ -1,5 +1,4 @@
-# OpenTelemetry collector configuration to forward OpenTelemetry traces,
-# and log traces for debugging
+# OpenTelemetry collector configuration to forward OpenTelemetry traces, and log traces for debugging
 #
 # https://opentelemetry.io/docs/collector/installation/
 # https://opentelemetry.io/docs/collector/configuration/

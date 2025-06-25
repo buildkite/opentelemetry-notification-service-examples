@@ -1,4 +1,4 @@
-# OTel collector configuration to forward OpenTelemetry traces, and compute metrics from traes
+# OTel collector configuration to forward OpenTelemetry traces to Datadog APM
 #
 # https://opentelemetry.io/docs/collector/installation/
 # https://opentelemetry.io/docs/collector/configuration/
