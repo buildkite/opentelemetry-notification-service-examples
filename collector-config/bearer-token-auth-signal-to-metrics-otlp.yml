@@ -115,8 +115,7 @@ exporters:
     endpoint: upstream-otlp-endpoint:4317
 
 service:
-  extensions:
-    - bearertokenauth
+  extensions: [bearertokenauth]
 
   telemetry:
     logs:

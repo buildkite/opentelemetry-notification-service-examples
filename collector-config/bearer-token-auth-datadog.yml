@@ -45,8 +45,7 @@ processors:
     timeout: 10s
 
 service:
-  extensions:
-    - bearertokenauth
+  extensions: [bearertokenauth]
 
   pipelines:
     traces:

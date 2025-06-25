@@ -11,16 +11,18 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
         auth:
-          authenticator: bearertokenauth
+          authenticator: basicauth
       http:
         endpoint: 0.0.0.0:4318
         auth:
-          authenticator: bearertokenauth
+          authenticator: basicauth
 
 extensions:
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/bearertokenauthextension
-  bearertokenauth:
-    token: ${env:OTLP_HTTP_BEARER_TOKEN}
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
+  basicauth:
+    client_auth:
+      username: ${env:BASIC_AUTH_USERNAME}
+      password: ${env:BASIC_AUTH_PASSWORD}
 
     # or read from file
     # token_file: "/path/to/token/file"
@@ -39,7 +41,7 @@ processors:
     timeout: 10s
 
 service:
-  extensions: [bearertokenauth]
+  extensions: [basicauth]
 
   pipelines:
     traces:
