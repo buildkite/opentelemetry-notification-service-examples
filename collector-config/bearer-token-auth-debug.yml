@@ -1,0 +1,49 @@
+# OpenTelemetry collector configuration to forward OpenTelemetry traces,
+# and log traces for debugging
+#
+# https://opentelemetry.io/docs/collector/installation/
+# https://opentelemetry.io/docs/collector/configuration/
+---
+receivers:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        auth:
+          authenticator: bearertokenauth
+      http:
+        endpoint: 0.0.0.0:4318
+        auth:
+          authenticator: bearertokenauth
+
+extensions:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/bearertokenauthextension
+  bearertokenauth:
+    token: ${env:OTLP_HTTP_BEARER_TOKEN}
+
+    # or read from file
+    # token_file: "/path/to/token/file"
+
+exporters:
+  # debug exporter logs telemetry data to console
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/debugexporter
+  debug:
+    verbosity: detailed
+
+processors:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  batch:
+    send_batch_max_size: 100
+    send_batch_size: 10
+    timeout: 10s
+
+service:
+  extensions:
+    - bearertokenauth
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]

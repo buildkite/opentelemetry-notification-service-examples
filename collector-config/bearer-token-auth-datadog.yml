@@ -1,0 +1,60 @@
+# OTel collector configuration to forward OpenTelemetry traces, and compute metrics from traes
+#
+# https://opentelemetry.io/docs/collector/installation/
+# https://opentelemetry.io/docs/collector/configuration/
+---
+receivers:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        auth:
+          authenticator: bearertokenauth
+      http:
+        endpoint: 0.0.0.0:4318
+        auth:
+          authenticator: bearertokenauth
+
+extensions:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/bearertokenauthextension
+  bearertokenauth:
+    token: ${env:OTLP_HTTP_BEARER_TOKEN}
+
+    # or read from file
+    # token_file: "/path/to/token/file"
+
+connectors:
+  # datadog connector processes traces and computes some service metrics
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/connector/datadogconnector
+  datadog/connector:
+
+exporters:
+  # forward to datadog
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/datadogexporter
+  datadog/exporter:
+    api:
+      site: datadoghq.com
+      key: ${env:DD_API_KEY}
+
+processors:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  batch:
+    send_batch_max_size: 100
+    send_batch_size: 10
+    timeout: 10s
+
+service:
+  extensions:
+    - bearertokenauth
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog/connector, datadog/exporter]
+
+    metrics:
+      receivers: [datadog/connector]
+      processors: [batch]
+      exporters: [datadog/exporter]

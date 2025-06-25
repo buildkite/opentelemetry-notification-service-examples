@@ -1,0 +1,148 @@
+# OpenTelemetry collector configuration to collect OpenTelemetry traces, and compute metrics from traces forwarding them both to OTLP endpoint
+#
+# https://opentelemetry.io/docs/collector/installation/
+# https://opentelemetry.io/docs/collector/configuration/
+#
+---
+receivers:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        auth:
+          authenticator: bearertokenauth
+      http:
+        endpoint: 0.0.0.0:4318
+        auth:
+          authenticator: bearertokenauth
+
+extensions:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/bearertokenauthextension
+  bearertokenauth:
+    token: ${env:OTLP_HTTP_BEARER_TOKEN}
+
+    # or read from file
+    # token_file: "/path/to/token/file"
+    #
+connectors:
+  # convert spans to metrics - example transformations
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/connector/signaltometricsconnector
+  # OTTL / OpenTelemetry Transformation Language: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md
+  signaltometrics:
+    spans:
+      - name: buildkite.builds.count
+        description: Count of Buildkite Builds
+        condition: resource.attributes["service.name"] == "buildkite" && span.name == "buildkite.build"
+        sum:
+          value: Int(AdjustedCount())
+        include_resource_attributes:
+          - key: buildkite.pipeline.slug
+          - key: buildkite.organization.slug
+          - key: buildkite.build.source
+        attributes:
+          - key: buildkite.build.state
+
+      - name: buildkite.builds.duration
+        description: Duration of Buildkite Builds
+        condition: resource.attributes["service.name"] == "buildkite" && span.name == "buildkite.build"
+        unit: ms
+        histogram:
+          value: Milliseconds(end_time - start_time)
+          count: Int(AdjustedCount())
+        include_resource_attributes:
+          - key: buildkite.pipeline.slug
+          - key: buildkite.organization.slug
+          - key: buildkite.build.source
+        attributes:
+          - key: buildkite.build.state
+
+      - name: buildkite.jobs.count
+        description: Count of Buildkite Jobs
+        condition: resource.attributes["service.name"] == "buildkite" && span.name == "buildkite.job"
+        sum:
+          value: Int(AdjustedCount())
+        include_resource_attributes:
+          - key: buildkite.pipeline.slug
+          - key: buildkite.organization.slug
+          - key: buildkite.job.step_key
+          - key: buildkite.build.source
+        attributes:
+          - key: buildkite.job.exit_status
+          - key: buildkite.job.passed
+
+      - name: buildkite.jobs.duration
+        description: Duration of Buildkite Jobs
+        condition: resource.attributes["service.name"] == "buildkite" && span.name == "buildkite.job"
+        unit: ms
+        histogram:
+          value: Milliseconds(end_time - start_time)
+          count: Int(AdjustedCount())
+        include_resource_attributes:
+          - key: buildkite.pipeline.slug
+          - key: buildkite.organization.slug
+          - key: buildkite.job.step_key
+          - key: buildkite.build.source
+        attributes:
+          - key: buildkite.job.exit_status
+          - key: buildkite.job.passed
+
+processors:
+  # ensure processed metrics behave correctly if sent to prometheus
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/deltatocumulativeprocessor
+  deltatocumulative:
+
+  # copy select resource attributes to metric datapoints to allow filtering in PromQL
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor
+  transform:
+    error_mode: propagate
+    metric_statements:
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/contexts/ottldatapoint
+      - context: datapoint
+        statements:
+          - set(attributes["buildkite.pipeline.slug"], resource.attributes["buildkite.pipeline.slug"])
+          - set(attributes["buildkite.organization.slug"], resource.attributes["buildkite.organization.slug"])
+          - set(attributes["buildkite.build.source"], resource.attributes["buildkite.build.source"])
+
+exporters:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/debugexporter
+  debug:
+    verbosity: normal
+
+  # forward to grafana-lgtm stack
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+  otlp:
+    endpoint: upstream-otlp-endpoint:4317
+
+service:
+  extensions:
+    - bearertokenauth
+
+  telemetry:
+    logs:
+      level: debug
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters:
+        # also use signaltometrics
+        - signaltometrics
+
+        # forward traces to grafana unchanged
+        - otlp
+
+    metrics:
+      receivers:
+        - signaltometrics
+
+      processors:
+        - deltatocumulative
+        - transform
+
+      exporters:
+        # log out metrics
+        - debug
+
+        # send processed span metrics on to upstream otlp endpoint
+        - otlp
