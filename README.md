@@ -21,7 +21,7 @@ Please provide the base URL for your OTLP endpoint. Do not include the `/v1/trac
 
 ## Headers
 
-Add any additional HTTP headers to the request. Depending on the destination, you may need to specify API keys or other headers to influence the behaviour of the downstream collector.
+Add any additional HTTP headers to the request. Depending on the destination, you may need to specify API keys or other headers to influence the behaviour of the downstream collector. Values for headers are always stored encrypted server-side.
 
 Here are some common examples.
 
@@ -30,10 +30,20 @@ Here are some common examples.
 Key: `Authorization`
 Value: `Bearer <your-token>`
 
+See [bearer-debug.yml](./collector-config/bearer-auth-debug.yml) for example OpenTelemetry Collector configuration.
+
 ### Basic auth
 
+First, create a base64 encoded string of the username and password separated by a colon.
+
+```bash
+echo -n "${USER}:${PASSWORD}" | base64
+```
+
 Key: `Authorization`
-Value: `Basic <base64(concat(<user>, <password>))>`
+Value: `Basic <base64 encoded ${USER}:${PASSWORD})>`
+
+See [basic-auth-debug.yml](./collector-config/basic-auth-debug.yml) for example OpenTelemetry Collector configuration.
 
 ## Honeycomb
 
@@ -63,6 +73,10 @@ Add the required headers:
 Replace `${YOUR_SITE}` with the organization name you received from Datadog.
 
 For more information, see the Datadog documentation: https://docs.datadoghq.com/opentelemetry/setup/agentless/traces/
+
+## Datadog via OpenTelemetry Collector
+
+See [bearer-token-auth-datadog.yml](./collector-config/bearer-token-auth-datadog.yml)
 
 ## Propagating traces to Buildkite agents
 
@@ -114,13 +128,35 @@ The OpenTelemetry collector is an open source service for collecting, exporting 
 
 See [collector-config](./collector-config) for examples of OpenTelemetry collector configuration.
 
-If using the `otel/opentelemetry-collector-contrib` image, you can configure the collector by mounting the your config file at `/etc/otelcol-contrib/config.yaml` or by overriding the `command` to `--config=env:OTEL_CONFIG` and setting the `OTEL_CONFIG` environment variable to the *contents* of your config file.
+If using the `otel/opentelemetry-collector-contrib` Docker image, you can configure the collector by mounting the your config file at `/etc/otelcol-contrib/config.yaml` or by overriding the `command` to `--config=env:OTEL_CONFIG` and setting the `OTEL_CONFIG` environment variable to the *contents* of your config file.
 
-Consult the [Deployment](https://opentelemetry.io/docs/collector/deployment/) guide in the OpenTelemetry documentations for more information about hosting the collector.
+Consult the [Deployment](https://opentelemetry.io/docs/collector/deployment/) guide in the OpenTelemetry documentation for more information about hosting the collector.
+
+The OpenTelemetry collector also supports many downstream data stores via [exporters](https://opentelemetry.io/docs/collector/configuration/#exporters) including StatsD, Prometheus, Kafka, Tempo, OTLP as well as many other observability tools and vendors. See the [OpenTelemetry registry](https://opentelemetry.io/ecosystem/registry/?s=&component=exporter&language=collector) for a more complete list of supported exporters.
 
 ### References
 
 - https://opentelemetry.io/docs/collector/
 - https://github.com/open-telemetry/opentelemetry-collector
 - https://github.com/open-telemetry/opentelemetry-collector-contrib
+- https://opentelemetry.io/docs/collector/configuration/#authentication
 - https://hub.docker.com/r/otel/opentelemetry-collector-contrib
+
+## Validating OpenTelemetry Collector configuration
+
+`otelcol validate` lets you validate your [collector configuration](https://opentelemetry.io/docs/collector/configuration/).
+
+For example, to validate one of the example configs in [collector-config](./collector-config), say `basic-auth-debug.yml` you could run the following command:
+
+```bash
+docker run --rm -it -v $(pwd)/collector-config:/config otel/opentelemetry-collector-contrib validate --config=/config/basic-auth-debug.yml && echo "config valid"
+```
+
+Or for a config file like  `bearer-token-auth-datadog.yml` that specifes environment variables in the, you wouuld run the following command, noting the `-e` flags to provide the environment variables:
+
+```bash
+docker run --rm -e DD_API_KEY=abcd -e OTLP_HTTP_BEARER_TOKEN=example -it -v $(pwd)/collector-config:/config otel/opentelemetry-collector-contrib validate --config=/config/bearer-token-auth-datadog.yml && echo "config valid"
+config valid
+```
+
+There is also an online validator available at https://www.otelbin.io/
