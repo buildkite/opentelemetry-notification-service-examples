@@ -36,6 +36,7 @@ exporters:
     api:
       site: datadoghq.com
       key: ${env:DD_API_KEY}
+    resource_attributes_as_tags: true
 
 processors:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
