@@ -39,8 +39,8 @@ connectors:
         include_resource_attributes:
           - key: buildkite.pipeline.slug
           - key: buildkite.organization.slug
-          - key: buildkite.build.source
         attributes:
+          - key: buildkite.build.source
           - key: buildkite.build.state
 
       - name: buildkite.builds.duration
@@ -53,8 +53,8 @@ connectors:
         include_resource_attributes:
           - key: buildkite.pipeline.slug
           - key: buildkite.organization.slug
-          - key: buildkite.build.source
         attributes:
+          - key: buildkite.build.source
           - key: buildkite.build.state
 
       - name: buildkite.jobs.count
@@ -65,9 +65,9 @@ connectors:
         include_resource_attributes:
           - key: buildkite.pipeline.slug
           - key: buildkite.organization.slug
-          - key: buildkite.job.step_key
-          - key: buildkite.build.source
         attributes:
+          - key: buildkite.build.source
+          - key: buildkite.step.key
           - key: buildkite.job.exit_status
           - key: buildkite.job.passed
 
@@ -81,9 +81,9 @@ connectors:
         include_resource_attributes:
           - key: buildkite.pipeline.slug
           - key: buildkite.organization.slug
-          - key: buildkite.job.step_key
-          - key: buildkite.build.source
         attributes:
+          - key: buildkite.build.source
+          - key: buildkite.step.key
           - key: buildkite.job.exit_status
           - key: buildkite.job.passed
 
@@ -102,7 +102,7 @@ processors:
         statements:
           - set(attributes["buildkite.pipeline.slug"], resource.attributes["buildkite.pipeline.slug"])
           - set(attributes["buildkite.organization.slug"], resource.attributes["buildkite.organization.slug"])
-          - set(attributes["buildkite.build.source"], resource.attributes["buildkite.build.source"])
+          - set(attributes["buildkite.build.source"], span.attributes["buildkite.build.source"])
 
 exporters:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/debugexporter
