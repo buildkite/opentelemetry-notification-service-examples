@@ -60,21 +60,27 @@ For more information, see the honeycomb documentation: https://docs.honeycomb.io
 
 ## Datadog Agentless OpenTelemetry (Preview)
 
-Endpoint: `https://trace.agent.datadoghq.com/api/v0.2/traces`
+> [!NOTE]
+> The Datadog OTLP traces intake endpoint is currently in preview. Contact your Datadog account representative to request access.
+
+Set the endpoint to the OTLP traces intake base URL for your [Datadog site](https://docs.datadoghq.com/getting_started/site/). Do not include the `/v1/traces` path, as it is automatically appended. For example:
+
+- US1: `https://otlp.datadoghq.com`
+- US3: `https://otlp.us3.datadoghq.com`
+- US5: `https://otlp.us5.datadoghq.com`
+- EU1: `https://otlp.datadoghq.eu`
+- AP1: `https://otlp.ap1.datadoghq.com`
 
 Add the required headers:
 
-| Key              | Value               |
-| ---------------- | ------------------- |
-| `dd-protocol`    | `otlp`              |
-| `dd-api-key`     | `<Datadog API key>` |
-| `dd-otlp-source` | `${YOUR_SITE}`      |
+| Key              | Value                         |
+| ---------------- | ----------------------------- |
+| `dd-api-key`     | `<Datadog API key>`           |
+| `dd-otlp-source` | `<value provided by Datadog>` |
 
-Replace `${YOUR_SITE}` with the organization name you received from Datadog.
+The `dd-otlp-source` value is a specific identifier provided by Datadog after your organization is on the allowlist for the OTLP traces intake endpoint.
 
-For more information, see the Datadog documentation:
-
-https://docs.datadoghq.com/opentelemetry/setup/agentless/traces/
+For more information, see [Datadog's OTLP traces intake documentation](https://docs.datadoghq.com/opentelemetry/setup/otlp_ingest/traces/).
 
 ## Datadog via OpenTelemetry Collector
 
